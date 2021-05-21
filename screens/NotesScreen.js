@@ -46,7 +46,7 @@ export default function NotesScreen({ navigation, route }) {
         id: notes.length.toString(),
       };
       firebase.firestore().collection("todos").add(newNote);
-      setNotes([...notes, newNote]);
+      //setNotes([...notes, newNote]);
     }
   }, [route.params?.text]);
 
@@ -108,6 +108,20 @@ export default function NotesScreen({ navigation, route }) {
     </View>
   );
 } 
+
+function deleteNote(id) {
+  console.log("Deleting " + id);
+
+  firebase
+    .firestone()
+    .collection("todos")
+    .where("id", "==", id)
+    .get()
+    .then()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => doc.ref.delete());
+    });
+}
 
 const styles = StyleSheet.create({
   container: {
