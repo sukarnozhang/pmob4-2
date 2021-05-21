@@ -1,5 +1,7 @@
 import firebase from "../database/firebaseDB"
 
+const db = firebase.firestore().collection("todos");
+
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -43,7 +45,7 @@ export default function NotesScreen({ navigation, route }) {
       const newNote = {
         title: route.params.text,
         done: false,
-        id: notes.length.toString(),
+        //id: notes.length.toString(),
       };
       firebase.firestore().collection("todos").add(newNote);
       //setNotes([...notes, newNote]);
@@ -55,17 +57,20 @@ export default function NotesScreen({ navigation, route }) {
   }
 
   useEffect(() => {
-    const unsubscribe = firebase
-      .firestore()
-      .collection("todos")
-      .onSnapshot((collection) => {
-        const updatedNotes = collection.docs.map((doc) => doc.data());
+    const unsubscribe = db.onSnapshot((collection) => {
+        const updatedNotes = collection.docs.map((doc) => {
+          const noteObject = {
+            ...doc.data(),
+            id: doc.id,
+          };
+          console.log(noteObject);
+          return noteObject;
+        });
         setNotes(updatedNotes);
       });
 
-      return () => {
-        unsubscribe();
-      };
+      return unsubscribe;
+      
   }, []);
 
   // This deletes an individual note
@@ -112,15 +117,8 @@ export default function NotesScreen({ navigation, route }) {
 function deleteNote(id) {
   console.log("Deleting " + id);
 
-  firebase
-    .firestone()
-    .collection("todos")
-    .where("id", "==", id)
-    .get()
-    .then()
-    .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => doc.ref.delete());
-    });
+  db.doc(id).delete();
+    
 }
 
 const styles = StyleSheet.create({
