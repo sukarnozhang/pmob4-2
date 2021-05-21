@@ -1,3 +1,5 @@
+import firebase from "../database/firebaseDB"
+
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -10,6 +12,11 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function NotesScreen({ navigation, route }) {
   const [notes, setNotes] = useState([]);
+
+
+  //firebase.firestore().collection("testing").add({
+    //title:"Testing"
+  //})
 
   // This is to set up the top right button
   useEffect(() => {
@@ -38,6 +45,7 @@ export default function NotesScreen({ navigation, route }) {
         done: false,
         id: notes.length.toString(),
       };
+      firebase.firestore().collection("todos").add(newNote);
       setNotes([...notes, newNote]);
     }
   }, [route.params?.text]);
@@ -45,6 +53,20 @@ export default function NotesScreen({ navigation, route }) {
   function addNote() {
     navigation.navigate("Add Screen");
   }
+
+  useEffect(() => {
+    const unsubscribe = firebase
+      .firestore()
+      .collection("todos")
+      .onSnapshot((collection) => {
+        const updatedNotes = collection.docs.map((doc) => doc.data());
+        setNotes(updatedNotes);
+      });
+
+      return () => {
+        unsubscribe();
+      };
+  }, []);
 
   // This deletes an individual note
   function deleteNote(id) {
@@ -85,7 +107,7 @@ export default function NotesScreen({ navigation, route }) {
       />
     </View>
   );
-}
+} 
 
 const styles = StyleSheet.create({
   container: {
